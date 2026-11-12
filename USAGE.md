@@ -1,140 +1,308 @@
-# HMP4040 Usage Guide
+# HMP4040 — Usage Guide
 
-Python CLI and TUI tools for the Rohde & Schwarz HMP4040
-programmable power supply.
+Python command-line (CLI) and terminal (TUI) applications
+for the Rohde & Schwarz HMP4040 programmable power supply.
 
 Based on the original project:
-https://github.com/charkster/hmp4040
+[charkster/hmp4040](https://github.com/charkster/hmp4040)
 
-## Requirements
+## 1. Installation
 
-- Python 3
-- Rohde & Schwarz HMP4040
-- Network connectivity to the instrument
-- Python dependencies in `requirements.txt`
+### Clone the repository
 
-## Installation
+```bash
+git clone https://github.com/omerrbbulut/hmp4040.git
+cd hmp4040
+```
 
-Clone the repository:
+### Create a Python virtual environment
 
-    git clone https://github.com/omerrbbulut/hmp4040.git
-    cd hmp4040
+Linux / macOS:
 
-Create and activate a virtual environment (Linux/macOS):
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
 
-    python -m venv .venv
-    source .venv/bin/activate
+Windows PowerShell:
 
-On Windows PowerShell:
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
 
-    python -m venv .venv
-    .venv\Scripts\Activate.ps1
+### Install dependencies
 
-Install dependencies:
+```bash
+python -m pip install -r requirements.txt
+```
 
-    python -m pip install -r requirements.txt
+### Verify installation
 
-Verify installation:
+```bash
+python -c "import pyvisa, textual; print('Dependencies OK')"
+python -m pip check
+```
 
-    python -c "import pyvisa, textual; print('Dependencies OK')"
-    python -m pip check
+## 2. Network Connection
 
-## Connection
+The CLI uses TCP SCPI communication.
 
-The CLI communicates with the device using TCP SCPI.
+| Parameter | Default | Description |
+|---|---|---|
+| `--host` | `10.42.0.232` | Instrument IP address |
+| `--port` | `5025` | SCPI TCP port |
+| `--timeout` | `3000` | Communication timeout (ms) |
 
-Default connection settings:
-
-| Parameter | Default |
-|-----------|---------|
-| Host | 10.42.0.232 |
-| Port | 5025 |
-| Timeout | 3000 ms |
-
-Replace the host with your instrument's IP address.
+Specify global connection options before the subcommand.
 
 Example:
 
-    python hmp4040_cli.py --host 192.168.1.100 info
+```bash
+python hmp4040_cli.py --host 192.168.1.100 info
+```
 
-## CLI
+Use your instrument's actual IP address.
 
-Show available commands:
+## 3. Device Information
 
-    python hmp4040_cli.py --help
+Get instrument identification:
 
-Get device information:
+```bash
+python hmp4040_cli.py info
+```
 
-    python hmp4040_cli.py --host 192.168.1.100 info
+Read all channel states:
 
-Show all channel states:
+```bash
+python hmp4040_cli.py status
+```
 
-    python hmp4040_cli.py --host 192.168.1.100 status
+Reset the instrument:
 
-Additional command groups:
+```bash
+python hmp4040_cli.py reset
+```
 
-- `reset`: Reset the instrument
-- `ch`: Channel operations
-- `out`: Global output operations
-- `fuse`: Electronic fuse operations
-- `raw`: Raw SCPI commands
+**Warning:** Reset can change the instrument configuration.
 
-Display command-specific options:
+## 4. Channel Control
 
-    python hmp4040_cli.py ch --help
-    python hmp4040_cli.py out --help
-    python hmp4040_cli.py fuse --help
-    python hmp4040_cli.py raw --help
+### Read channel status
 
-CAUTION: `reset`, output, channel, fuse and raw commands
-can change the physical state of the instrument.
+```bash
+python hmp4040_cli.py ch status 1
+```
 
-## TUI
+### Set voltage
 
-Launch the terminal interface:
+```bash
+python hmp4040_cli.py ch set 1 --voltage 5.0
+```
 
-    python hmp4040_tui.py --host 192.168.1.100
+### Set current limit
 
-Connection options:
+```bash
+python hmp4040_cli.py ch set 1 --current 1.0
+```
 
-    --host HOST
-    --port PORT
-    --timeout TIMEOUT
+### Set voltage and current limit
 
-Example with explicit port and timeout:
+```bash
+python hmp4040_cli.py ch set 1 --voltage 5.0 --current 1.0
+```
 
-    python hmp4040_tui.py --host 192.168.1.100 --port 5025 --timeout 3000
+### Enable or disable a channel
 
-## Python Example
+```bash
+python hmp4040_cli.py ch on 1
+python hmp4040_cli.py ch off 1
+```
 
-Review `example.py` before execution:
+**Warning:** Enabling a channel can energize connected hardware,
+depending on the global output state.
 
-    python example.py --help
+## 5. Global Output Control
 
-## Troubleshooting
+Enable the global output:
 
-If the connection fails:
+```bash
+python hmp4040_cli.py out on
+```
 
-1. Confirm the instrument IP address.
-2. Confirm that the instrument and computer can communicate.
-3. Check TCP port 5025.
-4. Check firewall settings.
-5. Verify the instrument's SCPI socket configuration.
+Disable the global output:
 
-On Linux, you can test the TCP connection using:
+```bash
+python hmp4040_cli.py out off
+```
 
-    nc -vz 192.168.1.100 5025
+**Warning:** Global output activation can energize multiple
+previously enabled channels.
 
-## Safety
+## 6. Electronic Fuse
 
-Verify voltage, current limits and channel selection
-before enabling outputs. Never assume that connected
-equipment can tolerate the configured voltage or current.
+### Read fuse status
 
-## Credits
+```bash
+python hmp4040_cli.py fuse status 1
+```
+
+### Enable or disable fuse protection
+
+```bash
+python hmp4040_cli.py fuse on 1
+python hmp4040_cli.py fuse off 1
+```
+
+### Read fuse delay
+
+```bash
+python hmp4040_cli.py fuse delay 1
+```
+
+### Set fuse delay
+
+```bash
+python hmp4040_cli.py fuse delay 1 --value 100
+```
+
+The valid delay range and units depend on the instrument
+implementation. Confirm them before changing the value.
+
+### Check fuse trip state
+
+```bash
+python hmp4040_cli.py fuse trip 1
+```
+
+### Link fuse channels
+
+```bash
+python hmp4040_cli.py fuse link 1 2
+```
+
+### Remove a fuse link
+
+```bash
+python hmp4040_cli.py fuse unlink 1 2
+```
+
+### List linked channels
+
+```bash
+python hmp4040_cli.py fuse links 1
+```
+
+**Warning:** Fuse settings affect hardware protection behavior.
+
+## 7. Raw SCPI Commands
+
+### Send a query
+
+```bash
+python hmp4040_cli.py raw query "*IDN?"
+```
+
+### Send a write command
+
+```bash
+python hmp4040_cli.py raw write "INSTrument:NSELect 1"
+```
+
+Raw write commands can change the instrument state.
+
+Only use SCPI commands supported by the instrument firmware.
+
+## 8. Terminal User Interface
+
+Launch the TUI:
+
+```bash
+python hmp4040_tui.py
+```
+
+Specify the instrument IP address:
+
+```bash
+python hmp4040_tui.py --host 192.168.1.100
+```
+
+Specify all connection options:
+
+```bash
+python hmp4040_tui.py \
+    --host 192.168.1.100 \
+    --port 5025 \
+    --timeout 3000
+```
+
+View available startup options:
+
+```bash
+python hmp4040_tui.py --help
+```
+
+## 9. Python API
+
+The repository also contains the original Python instrument
+control library and an example application.
+
+Review the example before running:
+
+```bash
+python example.py --help
+```
+
+## 10. Troubleshooting
+
+### Connection refused or timeout
+
+- Verify the instrument IP address.
+- Confirm TCP port 5025.
+- Check the network connection and firewall.
+- Verify that the instrument supports and enables SCPI socket access.
+
+Check connectivity on Linux:
+
+```bash
+nc -vz 192.168.1.100 5025
+```
+
+### Missing Python modules
+
+Activate the virtual environment:
+
+```bash
+source .venv/bin/activate
+```
+
+Reinstall project dependencies:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+## 11. Safety
+
+The HMP4040 is a programmable power supply.
+
+Before enabling outputs:
+
+- Check channel voltage settings.
+- Verify current limits.
+- Confirm the selected channels.
+- Verify the load's electrical ratings.
+- Review electronic fuse configuration.
+
+Changing output or protection settings can damage connected
+hardware if incompatible values are used.
+
+## 12. Credits and License
 
 This repository extends the original
 [charkster/hmp4040](https://github.com/charkster/hmp4040)
-project.
+project with CLI and TUI functionality.
 
-Refer to LICENSE for licensing conditions.
+The original project history and license are preserved.
+
+See [LICENSE](LICENSE) for licensing conditions.
