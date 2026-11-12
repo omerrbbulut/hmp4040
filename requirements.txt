@@ -1,2 +1,8 @@
-pyvisa
-pyserial
+# VISA communication
+PyVISA>=1.16,<2
+PyVISA-py>=0.8,<1
+pyserial>=3.5,<4
+pyusb>=1.3,<2
+
+# Terminal interface
+textual>=8,<9

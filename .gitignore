@@ -1,6 +1,26 @@
+# Python
 __pycache__/
 *.py[cod]
-*.bak
+.pytest_cache/
+
+# Virtual environments
 .venv/
 venv/
+env/
+
+# Local settings and backups
 .env
+.env.*
+.local-backup/
+*.bak
+*.tmp
+*.log
+
+# Editors
+.vscode/
+.idea/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/

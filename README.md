@@ -19,3 +19,23 @@ Python 3 helper for Rohde & Schwarz HMP4040 power supply.
 conda create -n hmp4040-py3 python=3.11 -y
 conda activate hmp4040-py3
 pip install -r requirements.txt
+
+
+## Installation and Usage
+
+For installation instructions, Python virtual environment setup,
+dependencies, CLI and TUI usage, see:
+
+[Usage Guide](USAGE.md)
+
+## Original Project and Credits
+
+This project is based on the original
+[charkster/hmp4040](https://github.com/charkster/hmp4040).
+
+This fork extends the original implementation with:
+- Command-line interface (CLI)
+- Terminal user interface (TUI)
+- Additional improvements to instrument control
+
+The original license and project history are preserved.
